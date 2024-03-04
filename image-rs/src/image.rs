@@ -98,6 +98,9 @@ impl Default for ImageClient {
     // construct a default instance of `ImageClient`
     fn default() -> ImageClient {
         let config = ImageConfig::try_from(Path::new(CONFIGURATION_FILE_PATH)).unwrap_or_default();
+
+        println!("KS-image-rs: Starting ImageClient with config: ({:?})", config);
+
         let meta_store = MetaStore::try_from(Path::new(METAFILE)).unwrap_or_default();
 
         #[allow(unused_mut)]
@@ -114,6 +117,8 @@ impl Default for ImageClient {
                 data_dir,
                 std::sync::atomic::AtomicUsize::new(*overlay_index),
             );
+
+            println!("KS-image-rs: Starting overlayfs snapshotter");
             snapshots.insert(
                 SnapshotType::Overlay,
                 Box::new(overlayfs) as Box<dyn Snapshotter>,
@@ -232,6 +237,7 @@ impl ImageClient {
             (false, true) => RegistryAuth::Anonymous,
             _ => auth.expect("unexpected uninitialized auth"),
         };
+        println!("KS-image-rs: Instantiating PullClient");
 
         let mut client = PullClient::new(
             reference,
@@ -239,7 +245,11 @@ impl ImageClient {
             &auth,
             self.config.max_concurrent_download,
         )?;
+        println!("KS-image-rs: B3G1N: Pull Manifest ({:?})", image_url);
+
         let (image_manifest, image_digest, image_config) = client.pull_manifest().await?;
+
+        println!("KS-image-rs: END: Pull Manifest ({:?})", image_url);
 
         let id = image_manifest.config.digest.clone();
 
@@ -303,6 +313,7 @@ impl ImageClient {
 
         #[cfg(feature = "signature")]
         if self.config.security_validate {
+            println!("KS-image-rs: B3G1N: Signature Validation ({:?})", image_url);
             crate::signature::allows_image(
                 image_url,
                 &image_digest,
@@ -311,6 +322,7 @@ impl ImageClient {
             )
             .await
             .map_err(|e| anyhow!("Security validate failed: {:?}", e))?;
+            println!("KS-image-rs: END: Signature Validation ({:?})", image_url);
         }
 
         let (mut image_data, unique_layers, unique_diff_ids) = create_image_meta(
@@ -373,6 +385,8 @@ impl ImageClient {
             bail!("Failed to get bootstrap id, diff_ids is empty");
         };
 
+        println!("KS-image-rs: END: Do nydus bootstrap pull ({:?})", image_manifest);
+
         let bootstrap = utils::get_nydus_bootstrap_desc(image_manifest)
             .ok_or_else(|| anyhow!("Faild to get bootstrap oci descriptor"))?;
         let layer_metas = client
@@ -383,6 +397,8 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
+        println!("KS-image-rs: END: Do nydus bootstrap pull ({:?})", image_manifest);
+
         image_data.layer_metas = vec![layer_metas];
         let layer_db: HashMap<String, LayerMeta> = image_data
             .layer_metas
@@ -411,6 +427,7 @@ impl ImageClient {
                 );
             }
         };
+        println!("KS-image-rs: Starting nydus service");
         let image_id = service::start_nydus_service(
             image_data,
             reference,
