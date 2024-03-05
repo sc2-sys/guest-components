@@ -265,6 +265,7 @@ impl ImageClient {
 
         #[cfg(feature = "nydus")]
         if utils::is_nydus_image(&image_manifest) {
+            println!("KS-image-rs: Nydus image detected");
             {
                 let m = self.meta_store.lock().await;
                 if let Some(image_data) = &m.image_db.get(&id) {
@@ -291,7 +292,7 @@ impl ImageClient {
                 &image_digest,
                 &image_config,
             )?;
-
+            println!("KS-image-rs: B3G1N: Nydus image pull");
             return self
                 .do_pull_image_with_nydus(
                     &mut client,
@@ -301,6 +302,7 @@ impl ImageClient {
                     bundle_dir,
                 )
                 .await;
+            println!("KS-image-rs: END: Nydus image pull");
         }
 
         // If image has already been populated, just create the bundle.
