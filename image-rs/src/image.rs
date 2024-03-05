@@ -171,6 +171,7 @@ impl ImageClient {
         auth_info: &Option<&str>,
         decrypt_config: &Option<&str>,
     ) -> Result<String> {
+        println!("KS-image-rs: pull_image called");
         let reference = Reference::try_from(image_url)?;
 
         // Try to get auth using input param.
