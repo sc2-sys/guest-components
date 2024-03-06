@@ -122,6 +122,6 @@ snapshot-unionfs = ["nix", "dircpy", "fs_extra"]
 
 getresource = [ "lazy_static", "cfg-if" ]
 
-nydus = ["lazy_static", "nydus-api", "nydus-service"]
+nydus = ["nix", "lazy_static", "nydus-api", "nydus-service"]
 
 verity = ["devicemapper"]
