@@ -310,6 +310,7 @@ impl ImageClient {
         {
             let m = self.meta_store.lock().await;
             if let Some(image_data) = &m.image_db.get(&id) {
+                println!("KS-image-rs: meta_store already populated with ({:?})", image_data);
                 return create_bundle(image_data, bundle_dir, snapshot);
             }
         }
@@ -337,6 +338,7 @@ impl ImageClient {
         )?;
 
         let unique_layers_len = unique_layers.len();
+        println!("KS-image-rs: B3G1N: Calling async_pull_layers");
         let layer_metas = client
             .async_pull_layers(
                 unique_layers,
@@ -345,6 +347,7 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
+        println!("KS-image-rs: END: Calling async_pull_layers");
 
         image_data.layer_metas = layer_metas;
         let layer_db: HashMap<String, LayerMeta> = image_data
@@ -354,6 +357,12 @@ impl ImageClient {
             .collect();
 
         self.meta_store.lock().await.layer_db.extend(layer_db);
+
+
+        for (key, value) in &layer_db {
+            println!("KS-image-rs layer_db entry: {} => {}", key, value);
+        }
+
         if unique_layers_len != image_data.layer_metas.len() {
             bail!(
                 " {} layers failed to pull",
@@ -368,6 +377,14 @@ impl ImageClient {
             .await
             .image_db
             .insert(image_data.id.clone(), image_data.clone());
+
+
+
+        let meta_store_lock = meta_store.lock().await;
+        for (key, value) in meta_store_lock.image_db.iter() {
+            println!("KS-image-rs image_db entry: {} => {:?}", key, value);
+        }
+    
 
         Ok(image_id)
     }
