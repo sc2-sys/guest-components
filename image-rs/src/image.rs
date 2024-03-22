@@ -356,12 +356,11 @@ impl ImageClient {
             .map(|layer| (layer.compressed_digest.clone(), layer.clone()))
             .collect();
 
+        for (key, value) in layer_db.clone() {
+                println!("KS-image-rs layer_db entry: {} => {:?}", key, value);
+            }
+
         self.meta_store.lock().await.layer_db.extend(layer_db);
-
-
-        for (key, value) in &layer_db {
-            println!("KS-image-rs layer_db entry: {} => {:?}", key, value);
-        }
 
         if unique_layers_len != image_data.layer_metas.len() {
             bail!(
