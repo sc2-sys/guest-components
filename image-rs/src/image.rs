@@ -380,7 +380,7 @@ impl ImageClient {
 
 
 
-        let meta_store_lock = meta_store.lock().await;
+        let meta_store_lock = self.meta_store.lock().await;
         for (key, value) in meta_store_lock.image_db.iter() {
             println!("KS-image-rs image_db entry: {} => {:?}", key, value);
         }
