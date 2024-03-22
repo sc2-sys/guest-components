@@ -86,8 +86,8 @@ enclave-cc-eaakbc-rustls-tls = ["encryption-ring", "keywrap-native", "eaa-kbc", 
 enclave-cc-cckbc-rustls-tls = ["encryption-ring", "keywrap-native", "cc-kbc-sgx", "snapshot-unionfs", "signature-simple", "getresource", "signature-cosign-rustls", "oci-distribution-rustls"]
 
 # This will be based on `openssl` dependency
-#kata-cc-native-tls = ["encryption-openssl", "keywrap-ttrpc", "snapshot-overlayfs", "signature-cosign-native", "signature-simple", "getresource", "oci-distribution/native-tls"]
-kata-cc-native-tls = ["encryption-openssl", "keywrap-ttrpc", "signature-cosign-native", "signature-simple", "getresource", "oci-distribution/native-tls"]
+kata-cc-native-tls = ["encryption-openssl", "keywrap-ttrpc", "snapshot-overlayfs", "signature-cosign-native", "signature-simple", "getresource", "oci-distribution/native-tls"]
+#kata-cc-native-tls = ["encryption-openssl", "keywrap-ttrpc", "signature-cosign-native", "signature-simple", "getresource", "oci-distribution/native-tls"]
 enclave-cc-eaakbc-native-tls = ["encryption-openssl", "keywrap-native", "eaa-kbc", "snapshot-unionfs", "signature-simple", "getresource", "signature-cosign-native", "oci-distribution-native"]
 enclave-cc-cckbc-native-tls = ["encryption-openssl", "keywrap-native", "cc-kbc-sgx", "snapshot-unionfs", "signature-simple", "getresource", "signature-cosign-native", "oci-distribution-native"]
 
