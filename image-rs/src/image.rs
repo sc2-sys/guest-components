@@ -360,7 +360,7 @@ impl ImageClient {
 
 
         for (key, value) in &layer_db {
-            println!("KS-image-rs layer_db entry: {} => {}", key, value);
+            println!("KS-image-rs layer_db entry: {} => {:?}", key, value);
         }
 
         if unique_layers_len != image_data.layer_metas.len() {
