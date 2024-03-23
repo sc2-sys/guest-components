@@ -50,6 +50,7 @@ pub async fn start_nydus_service(
     let work_dir_buf = work_dir.to_owned();
 
     if nydus_config.is_fuse() {
+        println!("KS-image-rs: fuse mode detected");
         let fuse_config = nydus_config
             .get_fuse_config()
             .expect("Fuse configuration not found")
@@ -69,6 +70,7 @@ pub async fn start_nydus_service(
             bail!("Failed to start nydus service, {:?}", e);
         };
     } else if nydus_config.is_fscache() {
+        println!("KS-image-rs: fscache mode detected");
         let fscache_config = nydus_config
             .get_fscache_config()
             .expect("Fscache configuration not found")
@@ -167,6 +169,7 @@ pub fn process_fuse_daemon(
         reference.repository(),
         work_dir.join("cache"),
     );
+    println!("KS-image-rs: process_fuse_deamon called, with config ({:?}), bootstrap ({:?}), mountpoint ({:?}),  workdir ({:?}) and fuse_config ({:?})", config, bootstrap, mountpoint, work_dir, fuse_config);
 
     if !mountpoint.exists() {
         std::fs::create_dir_all(mountpoint)?;

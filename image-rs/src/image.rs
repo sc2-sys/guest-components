@@ -303,7 +303,6 @@ impl ImageClient {
                     bundle_dir,
                 )
                 .await;
-            println!("KS-image-rs: END: Nydus image pull");
         }
 
         // If image has already been populated, just create the bundle.
@@ -338,7 +337,7 @@ impl ImageClient {
         )?;
 
         let unique_layers_len = unique_layers.len();
-        println!("KS-image-rs: B3G1N: Calling async_pull_layers");
+        println!("KS-image-rs: Calling async_pull_layers");
         let layer_metas = client
             .async_pull_layers(
                 unique_layers,
@@ -347,7 +346,6 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
-        println!("KS-image-rs: END: Calling async_pull_layers");
 
         image_data.layer_metas = layer_metas;
         let layer_db: HashMap<String, LayerMeta> = image_data
@@ -404,7 +402,7 @@ impl ImageClient {
             bail!("Failed to get bootstrap id, diff_ids is empty");
         };
 
-        println!("KS-image-rs: END: Do nydus bootstrap pull ({:?})", image_manifest);
+        println!("KS-image-rs: B3G1N: Do nydus bootstrap pull ({:?})", image_manifest);
 
         let bootstrap = utils::get_nydus_bootstrap_desc(image_manifest)
             .ok_or_else(|| anyhow!("Faild to get bootstrap oci descriptor"))?;
