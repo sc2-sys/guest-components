@@ -100,6 +100,7 @@ impl<'a> PullClient<'a> {
                 let ms = meta_store.clone();
 
                 async move {
+                    let layer_digest = layer.digest.clone();
                     println!("CSG-M4GIC: B3G1N: Pull Single Layer ({:?})", layer_digest);
                     let layer_reader = client
                         .async_pull_blob(reference, &layer.digest)
