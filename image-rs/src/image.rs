@@ -339,7 +339,7 @@ impl ImageClient {
         )?;
 
         let unique_layers_len = unique_layers.len();
-        println!("KS-image-rs: Calling async_pull_layers");
+        println!("CSG-M4GIC: B3G1N: Pull Layers ({:?})", image_url);
         let layer_metas = client
             .async_pull_layers(
                 unique_layers,
@@ -348,6 +348,7 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
+        println!("CSG-M4GIC: END: Pull Layers ({:?})", image_url);
 
         image_data.layer_metas = layer_metas;
         let layer_db: HashMap<String, LayerMeta> = image_data
