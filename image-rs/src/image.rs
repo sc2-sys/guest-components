@@ -246,11 +246,11 @@ impl ImageClient {
             &auth,
             self.config.max_concurrent_download,
         )?;
-        println!("KS-image-rs: B3G1N: Pull Manifest ({:?})", image_url);
+        println!("CSG-M4GIC: B3G1N: (KS-image-rs) Pull Manifest");
 
         let (image_manifest, image_digest, image_config) = client.pull_manifest().await?;
 
-        println!("KS-image-rs: END: Pull Manifest ({:?})", image_url);
+        println!("CSG-M4GIC: END: (KS-image-rs) Pull Manifest");
 
         let id = image_manifest.config.digest.clone();
 
@@ -293,8 +293,8 @@ impl ImageClient {
                 &image_digest,
                 &image_config,
             )?;
-            println!("KS-image-rs: B3G1N: Nydus image pull");
-            return self
+            println!("CSG-M4GIC: B3G1N: (KS-image-rs) Nydus Image Pull");
+            let ret = self
                 .do_pull_image_with_nydus(
                     &mut client,
                     &mut image_data,
@@ -303,6 +303,8 @@ impl ImageClient {
                     bundle_dir,
                 )
                 .await;
+            println!("CSG-M4GIC: END: (KS-image-rs) Nydus Image Pull");
+            return ret
         }
 
         // If image has already been populated, just create the bundle.
@@ -316,7 +318,7 @@ impl ImageClient {
 
         #[cfg(feature = "signature")]
         if self.config.security_validate {
-            println!("KS-image-rs: B3G1N: Signature Validation ({:?})", image_url);
+            println!("CSG-M4GIC: B3G1N: (KS-image-rs) Signature Validation");
             crate::signature::allows_image(
                 image_url,
                 &image_digest,
@@ -325,7 +327,7 @@ impl ImageClient {
             )
             .await
             .map_err(|e| anyhow!("Security validate failed: {:?}", e))?;
-            println!("KS-image-rs: END: Signature Validation ({:?})", image_url);
+            println!("CSG-M4GIC: END: (KS-image-rs) Signature Validation");
         }
 
         let (mut image_data, unique_layers, unique_diff_ids) = create_image_meta(
@@ -402,7 +404,7 @@ impl ImageClient {
             bail!("Failed to get bootstrap id, diff_ids is empty");
         };
 
-        println!("KS-image-rs: B3G1N: Do nydus bootstrap pull ({:?})", image_manifest);
+        println!("CSG-M4GIC: B3G1N: (KS-image-rs) Nydus Bootstrap Pull");
 
         let bootstrap = utils::get_nydus_bootstrap_desc(image_manifest)
             .ok_or_else(|| anyhow!("Faild to get bootstrap oci descriptor"))?;
@@ -414,8 +416,9 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
-        println!("KS-image-rs: END: Do nydus bootstrap pull ({:?})", image_manifest);
-
+        println!("CSG-M4GIC: END: (KS-image-rs) Nydus Bootstrap Pull");
+        
+        println!("CSG-M4GIC: B3G1N: (KS-image-rs) Handle Bootstrap");
         image_data.layer_metas = vec![layer_metas];
         let layer_db: HashMap<String, LayerMeta> = image_data
             .layer_metas
@@ -441,7 +444,7 @@ impl ImageClient {
                 bail!(
                     "default snapshot {} not found",
                     &self.config.default_snapshot
-                );
+                ); 
             }
         };
         println!("KS-image-rs: Starting nydus service");
@@ -461,6 +464,7 @@ impl ImageClient {
             .image_db
             .insert(image_data.id.clone(), image_data.clone());
 
+            println!("CSG-M4GIC: END: (KS-image-rs) Handle Bootstrap");
         Ok(image_id)
     }
 }
