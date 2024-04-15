@@ -99,7 +99,7 @@ impl Default for ImageClient {
     fn default() -> ImageClient {
         let config = ImageConfig::try_from(Path::new(CONFIGURATION_FILE_PATH)).unwrap_or_default();
 
-        println!("KS-image-rs: Starting ImageClient with config: ({:?})", config);
+        //println!("KS-image-rs: Starting ImageClient with config: ({:?})", config);
 
         let meta_store = MetaStore::try_from(Path::new(METAFILE)).unwrap_or_default();
 
@@ -118,7 +118,7 @@ impl Default for ImageClient {
                 std::sync::atomic::AtomicUsize::new(*overlay_index),
             );
 
-            println!("KS-image-rs: Starting overlayfs snapshotter");
+            //println!("KS-image-rs: Starting overlayfs snapshotter");
             snapshots.insert(
                 SnapshotType::Overlay,
                 Box::new(overlayfs) as Box<dyn Snapshotter>,
@@ -171,7 +171,7 @@ impl ImageClient {
         auth_info: &Option<&str>,
         decrypt_config: &Option<&str>,
     ) -> Result<String> {
-        println!("KS-image-rs: pull_image called");
+        //println!("KS-image-rs: pull_image called");
         let reference = Reference::try_from(image_url)?;
 
         // Try to get auth using input param.
@@ -238,7 +238,7 @@ impl ImageClient {
             (false, true) => RegistryAuth::Anonymous,
             _ => auth.expect("unexpected uninitialized auth"),
         };
-        println!("KS-image-rs: Instantiating PullClient");
+        //println!("KS-image-rs: Instantiating PullClient");
 
         let mut client = PullClient::new(
             reference,
@@ -246,11 +246,11 @@ impl ImageClient {
             &auth,
             self.config.max_concurrent_download,
         )?;
-        println!("CSG-M4GIC: B3G1N: (KS-image-rs) Pull Manifest");
+        //println!("CSG-M4GIC: B3G1N: (KS-image-rs) Pull Manifest");
 
         let (image_manifest, image_digest, image_config) = client.pull_manifest().await?;
 
-        println!("CSG-M4GIC: END: (KS-image-rs) Pull Manifest");
+        //println!("CSG-M4GIC: END: (KS-image-rs) Pull Manifest");
 
         let id = image_manifest.config.digest.clone();
 
@@ -293,7 +293,7 @@ impl ImageClient {
                 &image_digest,
                 &image_config,
             )?;
-            println!("CSG-M4GIC: B3G1N: (KS-image-rs) Nydus Image Pull");
+            //println!("CSG-M4GIC: B3G1N: (KS-image-rs) Nydus Image Pull");
             let ret = self
                 .do_pull_image_with_nydus(
                     &mut client,
@@ -303,7 +303,7 @@ impl ImageClient {
                     bundle_dir,
                 )
                 .await;
-            println!("CSG-M4GIC: END: (KS-image-rs) Nydus Image Pull");
+            //println!("CSG-M4GIC: END: (KS-image-rs) Nydus Image Pull");
             return ret
         }
 
@@ -311,7 +311,7 @@ impl ImageClient {
         {
             let m = self.meta_store.lock().await;
             if let Some(image_data) = &m.image_db.get(&id) {
-                println!("KS-image-rs: meta_store already populated with ({:?})", image_data);
+                //println!("KS-image-rs: meta_store already populated with ({:?})", image_data);
                 return create_bundle(image_data, bundle_dir, snapshot);
             }
         }
@@ -339,7 +339,7 @@ impl ImageClient {
         )?;
 
         let unique_layers_len = unique_layers.len();
-        println!("CSG-M4GIC: B3G1N: Pull Layers ({:?})", image_url);
+        //println!("CSG-M4GIC: B3G1N: Pull Layers ({:?})", image_url);
         let layer_metas = client
             .async_pull_layers(
                 unique_layers,
@@ -348,7 +348,7 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
-        println!("CSG-M4GIC: END: Pull Layers ({:?})", image_url);
+        //println!("CSG-M4GIC: END: Pull Layers ({:?})", image_url);
 
         image_data.layer_metas = layer_metas;
         let layer_db: HashMap<String, LayerMeta> = image_data
@@ -357,9 +357,9 @@ impl ImageClient {
             .map(|layer| (layer.compressed_digest.clone(), layer.clone()))
             .collect();
 
-        for (key, value) in layer_db.clone() {
-                println!("KS-image-rs layer_db entry: {} => {:?}", key, value);
-            }
+        // for (key, value) in layer_db.clone() {
+        //         println!("KS-image-rs layer_db entry: {} => {:?}", key, value);
+        //     }
 
         self.meta_store.lock().await.layer_db.extend(layer_db);
 
@@ -381,9 +381,9 @@ impl ImageClient {
 
 
         let meta_store_lock = self.meta_store.lock().await;
-        for (key, value) in meta_store_lock.image_db.iter() {
-            println!("KS-image-rs image_db entry: {} => {:?}", key, value);
-        }
+        // for (key, value) in meta_store_lock.image_db.iter() {
+        //     println!("KS-image-rs image_db entry: {} => {:?}", key, value);
+        // }
     
 
         Ok(image_id)
@@ -405,7 +405,7 @@ impl ImageClient {
             bail!("Failed to get bootstrap id, diff_ids is empty");
         };
 
-        println!("CSG-M4GIC: B3G1N: (KS-image-rs) Nydus Bootstrap Pull");
+        //println!("CSG-M4GIC: B3G1N: (KS-image-rs) Nydus Bootstrap Pull");
 
         let bootstrap = utils::get_nydus_bootstrap_desc(image_manifest)
             .ok_or_else(|| anyhow!("Faild to get bootstrap oci descriptor"))?;
@@ -417,9 +417,9 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
-        println!("CSG-M4GIC: END: (KS-image-rs) Nydus Bootstrap Pull");
+        //println!("CSG-M4GIC: END: (KS-image-rs) Nydus Bootstrap Pull");
         
-        println!("CSG-M4GIC: B3G1N: (KS-image-rs) Handle Bootstrap");
+        //println!("CSG-M4GIC: B3G1N: (KS-image-rs) Handle Bootstrap");
         image_data.layer_metas = vec![layer_metas];
         let layer_db: HashMap<String, LayerMeta> = image_data
             .layer_metas
@@ -448,7 +448,7 @@ impl ImageClient {
                 ); 
             }
         };
-        println!("KS-image-rs: Starting nydus service");
+        //println!("KS-image-rs: Starting nydus service");
         let image_id = service::start_nydus_service(
             image_data,
             reference,
@@ -465,7 +465,7 @@ impl ImageClient {
             .image_db
             .insert(image_data.id.clone(), image_data.clone());
 
-            println!("CSG-M4GIC: END: (KS-image-rs) Handle Bootstrap");
+            //println!("CSG-M4GIC: END: (KS-image-rs) Handle Bootstrap");
         Ok(image_id)
     }
 }
