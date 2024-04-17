@@ -101,14 +101,14 @@ impl<'a> PullClient<'a> {
 
                 async move {
                     let layer_digest = layer.digest.clone();
-                    println!("CSG-M4GIC: B3G1N: Pull Single Layer ({:?})", layer_digest);
+                    //println!("CSG-M4GIC: B3G1N: Pull Single Layer ({:?})", layer_digest);
                     let layer_reader = client
                         .async_pull_blob(reference, &layer.digest)
                         .await
                         .map_err(|e| anyhow!("failed to async pull blob {}", e.to_string()))?;
-                    println!("CSG-M4GIC: END: Pull Single Layer ({:?})", layer_digest);
+                    //println!("CSG-M4GIC: END: Pull Single Layer ({:?})", layer_digest);
 
-                    println!("CSG-M4GIC: B3G1N: Handle Single Layer ({:?})", layer_digest);
+                    //println!("CSG-M4GIC: B3G1N: Handle Single Layer ({:?})", layer_digest);
                     let tmp = self.async_handle_layer(
                         layer,
                         diff_ids[i].clone(),
@@ -117,7 +117,7 @@ impl<'a> PullClient<'a> {
                         ms,
                     )
                     .await;
-                    println!("CSG-M4GIC: END: Handle Single Layer ({:?})", layer_digest);
+                    //println!("CSG-M4GIC: END: Handle Single Layer ({:?})", layer_digest);
                     tmp.map_err(|e| anyhow!("failed to handle layer: {:?}", e))
                 }
             })
