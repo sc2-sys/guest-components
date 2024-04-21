@@ -137,6 +137,7 @@ pub fn create_verity_device(
     verity_option: &DmVerityOption,
     source_device_path: &Path,
 ) -> Result<String> {
+    println!("CSG-M4GIC: B3G1N: (KS-image-rs) create_verity_device, path: ({:?}), option: ({:?})", source_device_path, verity_option);
     let dm = DM::new()?;
     let verity_name = DmName::new(&verity_option.hash)?;
     let id = DevId::Name(verity_name);
@@ -173,6 +174,7 @@ pub fn create_verity_device(
         verity_option.hash,
         "-",
     );
+    println!("CSG-M4GIC: (KS-image-rs) dm_verity params: ({:?})", verity_params);
     // Mapping table in device mapper: <start_sector> <size> <target_name> <target_params>:
     // <start_sector> is 0
     // <size> is size of device in sectors, and one sector is equal to 512 bytes.
@@ -186,9 +188,11 @@ pub fn create_verity_device(
     )];
 
     dm.device_create(verity_name, None, opts)?;
+    println!("CSG-M4GIC: (KS-image-rs) verity device created");
     dm.table_load(&id, verity_table.as_slice(), opts)?;
     dm.device_suspend(&id, opts)?;
 
+    println!("CSG-M4GIC: END: (KS-image-rs) create_verity_device");
     Ok(format!("/dev/mapper/{}", &verity_option.hash))
 }
 
