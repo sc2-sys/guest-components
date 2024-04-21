@@ -198,6 +198,7 @@ pub fn create_verity_device(
             println!("CSG-M4GIC: (KS-image-rs) Error occurred: {}", e);
             Err(e)
         }
+    }
 
     println!("CSG-M4GIC: (KS-image-rs) verity device created");
     dm.table_load(&id, verity_table.as_slice(), opts)?;
