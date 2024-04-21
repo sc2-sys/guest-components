@@ -187,7 +187,18 @@ pub fn create_verity_device(
         verity_params,
     )];
 
-    dm.device_create(verity_name, None, opts)?;
+    //dm.device_create(verity_name, None, opts)?;
+
+    match dm.device_create(verity_name, None, opts) {
+        Ok(_) => {
+            println!("CSG-M4GIC: (KS-image-rs) Device created successfully.");
+            Ok(())
+        },
+        Err(e) => {
+            println!("CSG-M4GIC: (KS-image-rs) Error occurred: {}", e);
+            Err(e)
+        }
+
     println!("CSG-M4GIC: (KS-image-rs) verity device created");
     dm.table_load(&id, verity_table.as_slice(), opts)?;
     dm.device_suspend(&id, opts)?;
