@@ -8,6 +8,8 @@ use devicemapper::{DevId, DmFlags, DmName, DmOptions, DM};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::path::Path;
+use std::str;
+use std::process::Command;
 
 /// Configuration information for DmVerity device.
 #[derive(Debug, Deserialize, Serialize)]
@@ -129,6 +131,54 @@ impl TryFrom<&String> for DmVerityOption {
     }
 }
 
+fn start_udev() {
+    let check_udev = Command::new("pgrep")
+        .args(&["-x", "systemd-udevd"])
+        .output()
+        .expect("KS (image-rs) Failed to execute pgrep");
+
+    if check_udev.status.success() {
+        println!("KS (image-rs) udev daemon is already running.");
+        println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
+    } else {
+        println!("KS (image-rs) udev daemon is not running.");
+        println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
+        println!("KS (image-rs) Attempting to start udev...");
+
+        let cmds = [
+            "/lib/systemd/systemd-udevd --daemon",
+            "udevadm trigger",
+            "udevadm settle",
+        ];
+        for cmd in cmds.iter() {
+            let output = Command::new("sh")
+                .arg("-c")
+                .arg(cmd)
+                .output()
+                .expect("KS (image-rs) Failed to execute udev command");
+
+            if output.status.success() {
+                println!("KS (image-rs) Command '{}' executed successfully.", cmd);
+            } else {
+                eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
+            }
+        }
+        let check_udev = Command::new("pgrep")
+        .args(&["-x", "systemd-udevd"])
+        .output()
+        .expect("KS (image-rs) Failed to execute pgrep");
+
+        if check_udev.status.success() {
+            println!("KS (image-rs) udev daemon sucesfully started.");
+            println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
+        } else {
+            println!("KS (image-rs) udev daemon not started.");
+            println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
+        }
+    }
+}
+
+
 /// Creates a mapping with <name> backed by data_device <source_device_path>
 /// and using hash_device for in-kernel verification.
 /// It will return the verity block device Path "/dev/mapper/<name>"
@@ -175,6 +225,8 @@ pub fn create_verity_device(
         "-",
     );
     println!("CSG-M4GIC: (KS-image-rs) dm_verity params: ({:?})", verity_params);
+
+    start_udev();
     // Mapping table in device mapper: <start_sector> <size> <target_name> <target_params>:
     // <start_sector> is 0
     // <size> is size of device in sectors, and one sector is equal to 512 bytes.
