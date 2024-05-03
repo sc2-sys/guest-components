@@ -304,7 +304,7 @@ pub fn create_verity_device(
     }
     ////////
 
-    //dm.device_suspend(&id, opts)?;
+    dm.device_suspend(&id, opts)?;
     let result = dm.device_suspend(&id, opts);
     match result {
         Ok(device_info) => {
