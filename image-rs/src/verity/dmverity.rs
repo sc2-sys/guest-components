@@ -263,6 +263,19 @@ pub fn create_verity_device(
     // }
 
     println!("(KS-image-rs) verity device created");
+
+    let cmd = "ls /dev/mapper"
+    let output = Command::new("sh")
+    .arg("-c")
+    .arg(cmd)
+    .output()
+    .expect("KS (image-rs) Failed to execute 'ls' command");
+
+    if output.status.success() {
+        println!("KS (image-rs) Command '{}' executed successfully.", cmd);
+    } else {
+        eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
+    }
     //let device_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
 
     //println!("CSG-M4GIC: (KS-image-rs)  Loaded table with dev info: {:?}", device_info);
