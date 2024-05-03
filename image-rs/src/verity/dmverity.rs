@@ -274,7 +274,7 @@ pub fn create_verity_device(
     if output.status.success() {
         let stdout = str::from_utf8(&output.stdout).unwrap();
         println!("KS (image-rs) Command '{}' executed successfully.", cmd);
-        println!("Output:\n{}", stdout);
+        println!("KS  (image-rs) Output:\n{}", stdout);
     } else {
         eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
     }
