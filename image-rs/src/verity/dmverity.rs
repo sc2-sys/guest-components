@@ -10,6 +10,7 @@ use serde_json;
 use std::path::Path;
 use std::str;
 use std::process::Command;
+use nix::unistd::{access, AccessFlags};
 
 /// Configuration information for DmVerity device.
 #[derive(Debug, Deserialize, Serialize)]
@@ -131,6 +132,14 @@ impl TryFrom<&String> for DmVerityOption {
     }
 }
 
+fn udev_running() -> bool {
+    const UDEV_SOCKET_PATH: &str = "/run/udev/control";
+    matches!(
+        access(Path::new(UDEV_SOCKET_PATH), AccessFlags::F_OK),
+        Ok(())
+    )
+}
+
 fn start_udev() {
     let check_udev = Command::new("pgrep")
         .args(&["-x", "systemd-udevd"])
@@ -174,6 +183,11 @@ fn start_udev() {
         } else {
             println!("KS (image-rs) udev daemon not started.");
             println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
+        }
+        if udev_running() {
+            println!("udev/control is accessible.");
+        } else {
+            println!("udev/control is NOT accessible.");
         }
     }
 }
