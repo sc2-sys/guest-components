@@ -265,7 +265,7 @@ pub fn create_verity_device(
 
     println!("KS (image-rs) verity device created");
 
-    let cmd = "ls /dev/mapper";
+    let cmd = "ls /";
     let output = Command::new("sh")
     .arg("-c")
     .arg(cmd)
@@ -281,7 +281,7 @@ pub fn create_verity_device(
     }
 
 
-    dm.table_load(&id, verity_table.as_slice(), opts)?;
+    //dm.table_load(&id, verity_table.as_slice(), opts)?;
 
     //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
 
