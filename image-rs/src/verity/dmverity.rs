@@ -262,9 +262,9 @@ pub fn create_verity_device(
     //     result.unwrap();
     // }
 
-    println!("(KS-image-rs) verity device created");
+    println!("KS (image-rs) verity device created");
 
-    let cmd = "ls /dev/mapper";
+    let cmd = "ls /dev/vda";
     let output = Command::new("sh")
     .arg("-c")
     .arg(cmd)
@@ -274,15 +274,15 @@ pub fn create_verity_device(
     if output.status.success() {
         let stdout = str::from_utf8(&output.stdout).unwrap();
         println!("KS (image-rs) Command '{}' executed successfully.", cmd);
-        println!("KS  (image-rs) Output:\n{}", stdout);
+        println!("KS (image-rs) 'ls' Output:\n{}", stdout);
     } else {
         eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
     }
-    //let device_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
+    let device_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
 
-    //println!("CSG-M4GIC: (KS-image-rs)  Loaded table with dev info: {:?}", device_info);
+    println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
 
-    println!("(KS-image-rs) verity table loaded");
+    println!("KS (image-rs) verity table loaded");
 
     dm.device_suspend(&id, opts)?;
 
