@@ -261,8 +261,11 @@ pub fn create_verity_device(
         result.unwrap();
     }
 
-    println!("CSG-M4GIC: (KS-image-rs) verity device created");
+    println!("(KS-image-rs) verity device created");
     dm.table_load(&id, verity_table.as_slice(), opts)?;
+
+    println!("(KS-image-rs) verity table loaded");
+
     dm.device_suspend(&id, opts)?;
 
     println!("CSG-M4GIC: END: (KS-image-rs) create_verity_device");
