@@ -272,12 +272,25 @@ pub fn create_verity_device(
     .expect("KS (image-rs) Failed to execute 'ls' command");
 
     if output.status.success() {
-        let stdout = str::from_utf8(&output.stdout).unwrap();
-        println!("KS (image-rs) Command '{}' executed successfully.", cmd);
-        println!("KS (image-rs) 'ls' Output: {}", stdout);
+        let stdout = str::from_utf8(&output.stdout)
+            .unwrap_or("KS Failed to decode stdout as UTF-8");
+
+        for line in stdout.split('\n') {
+            println!("KS Line: {}", line);
+        }
     } else {
-        eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
+        let stderr = str::from_utf8(&output.stderr)
+            .unwrap_or("KS Failed to decode stderr as UTF-8");
+        eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
     }
+
+    // if output.status.success() {
+    //     let stdout = str::from_utf8(&output.stdout).unwrap();
+    //     println!("KS (image-rs) Command '{}' executed successfully.", cmd);
+    //     println!("KS (image-rs) 'ls' Output: {}", stdout);
+    // } else {
+    //     eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
+    // }
 
 
     dm.table_load(&id, verity_table.as_slice(), opts)?;
@@ -295,12 +308,25 @@ pub fn create_verity_device(
     .expect("KS (image-rs) Failed to execute 'ls' command");
 
     if output.status.success() {
-        let stdout = str::from_utf8(&output.stdout).unwrap();
-        println!("KS (image-rs) Command '{}' executed successfully.", cmd);
-        println!("KS (image-rs) 'ls' Output: {}", stdout);
+        let stdout = str::from_utf8(&output.stdout)
+            .unwrap_or("KS Failed to decode stdout as UTF-8");
+
+        for line in stdout.split('\n') {
+            println!("KS Line: {}", line);
+        }
     } else {
-        eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
+        let stderr = str::from_utf8(&output.stderr)
+            .unwrap_or("KS Failed to decode stderr as UTF-8");
+        eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
     }
+
+    // if output.status.success() {
+    //     let stdout = str::from_utf8(&output.stdout).unwrap();
+    //     println!("KS (image-rs) Command '{}' executed successfully.", cmd);
+    //     println!("KS (image-rs) 'ls' Output: {}", stdout);
+    // } else {
+    //     eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
+    // }
     ////////
 
     //dm.device_suspend(&id, opts)?;
