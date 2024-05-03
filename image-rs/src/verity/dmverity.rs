@@ -304,7 +304,16 @@ pub fn create_verity_device(
     }
     ////////
 
-    dm.device_suspend(&id, opts)?;
+    //dm.device_suspend(&id, opts)?;
+    let result = dm.device_suspend(&id, opts);
+    match result {
+        Ok(device_info) => {
+            println!("KS (image-rs) Device suspended successfully. Device info: {:?}", device_info);
+        },
+        Err(e) => {
+            println!("KS (image-rs) Error occurred while trying to suspend device: {:?}", e);
+        }
+    }
 
     println!("CSG-M4GIC: END: (KS-image-rs) create_verity_device");
     Ok(format!("/dev/mapper/{}", &verity_option.hash))
