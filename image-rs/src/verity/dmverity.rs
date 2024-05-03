@@ -255,13 +255,12 @@ pub fn create_verity_device(
     )];
 
     //dm.device_create(verity_name, None, opts)?;
-    dm.device_create(verity_name, None, opts);
+    dm.device_create(verity_name, None, opts)?;
 
     // if let Err(ref e) = result {
     //     println!("CSG-M4GIC: (KS-image-rs) Error occurred while creating device: {}", e);
     //     result.unwrap();
     // }
-
 
     println!("KS (image-rs) verity device created");
 
