@@ -254,15 +254,20 @@ pub fn create_verity_device(
     )];
 
     //dm.device_create(verity_name, None, opts)?;
-    let result = dm.device_create(verity_name, None, opts);
+    dm.device_create(verity_name, None, opts);
 
-    if let Err(ref e) = result {
-        println!("CSG-M4GIC: (KS-image-rs) Error occurred while creating device: {}", e);
-        result.unwrap();
-    }
+    // if let Err(ref e) = result {
+    //     println!("CSG-M4GIC: (KS-image-rs) Error occurred while creating device: {}", e);
+    //     result.unwrap();
+    // }
 
     println!("(KS-image-rs) verity device created");
-    dm.table_load(&id, verity_table.as_slice(), opts)?;
+    let result = dm.table_load(&id, verity_table.as_slice(), opts)?;
+
+    if let Err(ref e) = result {
+        println!("CSG-M4GIC: (KS-image-rs) Error occurred while loading table: {}", e);
+        result.unwrap();
+    }
 
     println!("(KS-image-rs) verity table loaded");
 
