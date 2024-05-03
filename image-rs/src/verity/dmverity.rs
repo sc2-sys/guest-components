@@ -262,12 +262,9 @@ pub fn create_verity_device(
     // }
 
     println!("(KS-image-rs) verity device created");
-    let result = dm.table_load(&id, verity_table.as_slice(), opts)?;
+    device_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
 
-    if let Err(ref e) = result {
-        println!("CSG-M4GIC: (KS-image-rs) Error occurred while loading table: {}", e);
-        result.unwrap();
-    }
+    println!("CSG-M4GIC: (KS-image-rs)  Loaded table with dev info: {:?}", device_info);
 
     println!("(KS-image-rs) verity table loaded");
 
