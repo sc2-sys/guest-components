@@ -186,9 +186,9 @@ fn start_udev() {
         }
     }
     if udev_running() {
-        println!("udev/control is accessible.");
+        println!("KS udev/control is accessible.");
     } else {
-        println!("udev/control is NOT accessible.");
+        println!("KS udev/control is NOT accessible.");
     }
 }
 
