@@ -264,35 +264,6 @@ pub fn create_verity_device(
 
     println!("KS (image-rs) verity device created");
 
-    let cmd = "ls /";
-    let output = Command::new("sh")
-    .arg("-c")
-    .arg(cmd)
-    .output()
-    .expect("KS (image-rs) Failed to execute 'ls' command");
-
-    if output.status.success() {
-        let stdout = str::from_utf8(&output.stdout)
-            .unwrap_or("KS Failed to decode stdout as UTF-8");
-
-        for line in stdout.split('\n') {
-            println!("KS Line: {}", line);
-        }
-    } else {
-        let stderr = str::from_utf8(&output.stderr)
-            .unwrap_or("KS Failed to decode stderr as UTF-8");
-        eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
-    }
-
-    // if output.status.success() {
-    //     let stdout = str::from_utf8(&output.stdout).unwrap();
-    //     println!("KS (image-rs) Command '{}' executed successfully.", cmd);
-    //     println!("KS (image-rs) 'ls' Output: {}", stdout);
-    // } else {
-    //     eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
-    // }
-
-
     dm.table_load(&id, verity_table.as_slice(), opts)?;
 
     //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
@@ -312,7 +283,7 @@ pub fn create_verity_device(
             .unwrap_or("KS Failed to decode stdout as UTF-8");
 
         for line in stdout.split('\n') {
-            println!("KS Line: {}", line);
+            println!("KS mapper file: {}", line);
         }
     } else {
         let stderr = str::from_utf8(&output.stderr)
@@ -320,14 +291,26 @@ pub fn create_verity_device(
         eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
     }
 
-    // if output.status.success() {
-    //     let stdout = str::from_utf8(&output.stdout).unwrap();
-    //     println!("KS (image-rs) Command '{}' executed successfully.", cmd);
-    //     println!("KS (image-rs) 'ls' Output: {}", stdout);
-    // } else {
-    //     eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
-    // }
-    ////////
+    let cmd = "ls /dev/vda";
+    let output = Command::new("sh")
+    .arg("-c")
+    .arg(cmd)
+    .output()
+    .expect("KS (image-rs) Failed to execute 'ls' command");
+
+    if output.status.success() {
+        let stdout = str::from_utf8(&output.stdout)
+            .unwrap_or("KS Failed to decode stdout as UTF-8");
+
+        for line in stdout.split('\n') {
+            println!("KS vda file: {}", line);
+        }
+    } else {
+        let stderr = str::from_utf8(&output.stderr)
+            .unwrap_or("KS Failed to decode stderr as UTF-8");
+        eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
+    }
+
 
     //dm.device_suspend(&id, opts)?;
     let result = dm.device_suspend(&id, opts);
