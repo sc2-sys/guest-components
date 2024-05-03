@@ -278,9 +278,9 @@ pub fn create_verity_device(
     } else {
         eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
     }
-    let device_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
+    dm.table_load(&id, verity_table.as_slice(), opts)?;
 
-    println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
+    //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
 
     println!("KS (image-rs) verity table loaded");
 
