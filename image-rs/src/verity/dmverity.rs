@@ -291,7 +291,7 @@ pub fn create_verity_device(
         eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
     }
 
-    let cmd = "ls /dev/vda";
+    let cmd = "ls /dev/sda";
     let output = Command::new("sh")
     .arg("-c")
     .arg(cmd)
@@ -303,7 +303,7 @@ pub fn create_verity_device(
             .unwrap_or("KS Failed to decode stdout as UTF-8");
 
         for line in stdout.split('\n') {
-            println!("KS vda file: {}", line);
+            println!("KS sda file: {}", line);
         }
     } else {
         let stderr = str::from_utf8(&output.stderr)
