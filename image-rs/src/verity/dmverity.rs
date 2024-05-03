@@ -264,7 +264,7 @@ pub fn create_verity_device(
 
     println!("(KS-image-rs) verity device created");
 
-    let cmd = "ls /dev/mapper"
+    let cmd = "ls /dev/mapper";
     let output = Command::new("sh")
     .arg("-c")
     .arg(cmd)
