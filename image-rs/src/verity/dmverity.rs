@@ -184,11 +184,11 @@ fn start_udev() {
             println!("KS (image-rs) udev daemon not started.");
             println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
         }
-        if udev_running() {
-            println!("udev/control is accessible.");
-        } else {
-            println!("udev/control is NOT accessible.");
-        }
+    }
+    if udev_running() {
+        println!("udev/control is accessible.");
+    } else {
+        println!("udev/control is NOT accessible.");
     }
 }
 
