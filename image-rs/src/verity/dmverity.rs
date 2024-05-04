@@ -273,7 +273,7 @@ pub fn create_verity_device(
 
     println!("KS (image-rs) verity table loaded");
 
-    dev_info = dm.device_info(&id).unwrap();
+    let dev_info = dm.device_info(&id).unwrap();
 
     println!("KS (image-rs) dev info collected: {:?}", dev_info);
 
