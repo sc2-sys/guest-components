@@ -247,12 +247,12 @@ pub fn create_verity_device(
     // <target_name> is name of mapping target, here "verity" for dm-verity
     // <target_params> are parameters for verity target
     
-    let verity_table = vec![(
-       0,
-       verity_option.blocknum * verity_option.blocksize / 512,
-       "verity".into(),
-       verity_params,
-    )];
+    //let verity_table = vec![(
+    //   0,
+    //   verity_option.blocknum * verity_option.blocksize / 512,
+    //   "verity".into(),
+    //   verity_params,
+    //)];
 
     //dm.device_create(verity_name, None, opts)?;
     let dev = dm.device_create(verity_name, None, opts).unwrap();
