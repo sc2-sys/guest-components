@@ -255,7 +255,9 @@ pub fn create_verity_device(
     )];
 
     //dm.device_create(verity_name, None, opts)?;
-    dm.device_create(verity_name, None, opts)?;
+    let dev = dm.device_create(verity_name, None, opts).unwrap();
+
+    println!("CSG-M4GIC: (KS-image-rs) Device created: {:?}", dev);
 
     // if let Err(ref e) = result {
     //     println!("CSG-M4GIC: (KS-image-rs) Error occurred while creating device: {}", e);
@@ -264,11 +266,17 @@ pub fn create_verity_device(
 
     println!("KS (image-rs) verity device created");
 
+
     dm.table_load(&id, verity_table.as_slice(), opts)?;
 
     //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
 
     println!("KS (image-rs) verity table loaded");
+
+    dev_info = dm.device_info(&id).unwrap();
+
+    println!("KS (image-rs) dev info collected: {:?}", dev_info);
+
 
     ////////
     let cmd = "ls /dev/mapper";
@@ -291,28 +299,14 @@ pub fn create_verity_device(
         eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
     }
 
-    let cmd = "ls /dev/sda";
-    let output = Command::new("sh")
-    .arg("-c")
-    .arg(cmd)
-    .output()
-    .expect("KS (image-rs) Failed to execute 'ls' command");
 
-    if output.status.success() {
-        let stdout = str::from_utf8(&output.stdout)
-            .unwrap_or("KS Failed to decode stdout as UTF-8");
+    //dm.device_suspend(&id, opts)?;
 
-        for line in stdout.split('\n') {
-            println!("KS sda file: {}", line);
-        }
-    } else {
-        let stderr = str::from_utf8(&output.stderr)
-            .unwrap_or("KS Failed to decode stderr as UTF-8");
-        eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
-    }
+    dm.device_suspend(&id, DmOptions::default().set_flags(DmFlags::DM_SKIP_LOCKFS)).unwrap();
+
+    println!("CSG-M4GIC: END: (KS-image-rs) create_verity_device");
 
 
-    dm.device_suspend(&id, opts)?;
     // let result = dm.device_suspend(&id, opts);
     // println!("KS (image-rs) Device suspended result {:?}", result);
     // match result {
@@ -323,7 +317,6 @@ pub fn create_verity_device(
     //         println!("KS (image-rs) Error occurred while trying to suspend device: {:?}", e);
     //     }
     // }
-
     println!("CSG-M4GIC: END: (KS-image-rs) create_verity_device");
     Ok(format!("/dev/mapper/{}", &verity_option.hash))
 }
