@@ -312,9 +312,9 @@ pub fn create_verity_device(
     }
 
 
-    //dm.device_suspend(&id, opts)?;
-    let result = dm.device_suspend(&id, opts);
-    println!("KS (image-rs) Device suspended result {:?}", result);
+    dm.device_suspend(&id, opts)?;
+    // let result = dm.device_suspend(&id, opts);
+    // println!("KS (image-rs) Device suspended result {:?}", result);
     // match result {
     //     Ok(device_info) => {
     //         println!("KS (image-rs) Device suspended successfully. Device info: {:?}", device_info);
