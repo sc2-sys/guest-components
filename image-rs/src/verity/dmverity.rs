@@ -304,7 +304,7 @@ pub fn create_verity_device(
 
     //dm.device_suspend(&id, DmOptions::default().set_flags(DmFlags::DM_SKIP_LOCKFS)).unwrap();
 
-    let result = dm.device_suspend(&id, DmOptions::default().set_flags(DmFlags::DM_SKIP_LOCKFS));
+    let result = dm.device_suspend(&id, opts);
     println!("KS (image-rs) Device suspended result {:?}", result);
     match result {
         Ok(device_info) => {
