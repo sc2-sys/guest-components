@@ -247,12 +247,12 @@ pub fn create_verity_device(
     // <target_name> is name of mapping target, here "verity" for dm-verity
     // <target_params> are parameters for verity target
     
-    //let verity_table = vec![(
-    //   0,
-    //   verity_option.blocknum * verity_option.blocksize / 512,
-    //   "verity".into(),
-    //   verity_params,
-    //)];
+    let verity_table = vec![(
+       0,
+       verity_option.blocknum * verity_option.blocksize / 512,
+       "verity".into(),
+       verity_params,
+    )];
 
     //dm.device_create(verity_name, None, opts)?;
     let dev = dm.device_create(verity_name, None, opts).unwrap();
@@ -267,9 +267,9 @@ pub fn create_verity_device(
     println!("KS (image-rs) verity device created");
 
 
-    //let dev_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
+    let dev_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
 
-    //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
+    println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
 
     //println!("KS (image-rs) verity table loaded");
 
