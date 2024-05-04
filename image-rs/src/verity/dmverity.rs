@@ -267,13 +267,13 @@ pub fn create_verity_device(
     println!("KS (image-rs) verity device created");
 
 
-    let dev_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
+    //let dev_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
 
     //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
 
-    println!("KS (image-rs) verity table loaded");
+    //println!("KS (image-rs) verity table loaded");
 
-    println!("KS (image-rs) dev info collected: {:?}", dev_info);
+    //println!("KS (image-rs) dev info collected: {:?}", dev_info);
 
 
     ////////
