@@ -304,9 +304,6 @@ pub fn create_verity_device(
 
     //dm.device_suspend(&id, DmOptions::default().set_flags(DmFlags::DM_SKIP_LOCKFS)).unwrap();
 
-    println!("CSG-M4GIC: END: (KS-image-rs) create_verity_device");
-
-
     let result = dm.device_suspend(&id, DmOptions::default().set_flags(DmFlags::DM_SKIP_LOCKFS));
     println!("KS (image-rs) Device suspended result {:?}", result);
     match result {
