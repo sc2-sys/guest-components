@@ -267,37 +267,35 @@ pub fn create_verity_device(
     println!("KS (image-rs) verity device created");
 
 
-    dm.table_load(&id, verity_table.as_slice(), opts)?;
+    let dev_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
 
     //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", device_info);
 
     println!("KS (image-rs) verity table loaded");
 
-    let dev_info = dm.device_info(&id).unwrap();
-
     println!("KS (image-rs) dev info collected: {:?}", dev_info);
 
 
     ////////
-    let cmd = "ls /dev/mapper";
-    let output = Command::new("sh")
-    .arg("-c")
-    .arg(cmd)
-    .output()
-    .expect("KS (image-rs) Failed to execute 'ls' command");
+    // let cmd = "ls /dev/mapper";
+    // let output = Command::new("sh")
+    // .arg("-c")
+    // .arg(cmd)
+    // .output()
+    // .expect("KS (image-rs) Failed to execute 'ls' command");
 
-    if output.status.success() {
-        let stdout = str::from_utf8(&output.stdout)
-            .unwrap_or("KS Failed to decode stdout as UTF-8");
+    // if output.status.success() {
+    //     let stdout = str::from_utf8(&output.stdout)
+    //         .unwrap_or("KS Failed to decode stdout as UTF-8");
 
-        for line in stdout.split('\n') {
-            println!("KS mapper file: {}", line);
-        }
-    } else {
-        let stderr = str::from_utf8(&output.stderr)
-            .unwrap_or("KS Failed to decode stderr as UTF-8");
-        eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
-    }
+    //     for line in stdout.split('\n') {
+    //         println!("KS mapper file: {}", line);
+    //     }
+    // } else {
+    //     let stderr = str::from_utf8(&output.stderr)
+    //         .unwrap_or("KS Failed to decode stderr as UTF-8");
+    //     eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
+    // }
 
 
     //dm.device_suspend(&id, opts)?;
