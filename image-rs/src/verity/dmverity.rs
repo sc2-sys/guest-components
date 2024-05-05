@@ -261,7 +261,8 @@ pub fn create_verity_device(
     );
     println!("CSG-M4GIC: (KS-image-rs) dm_verity params: ({:?})", verity_params);
 
-    start_udev();
+    //start_udev();
+    
     // Mapping table in device mapper: <start_sector> <size> <target_name> <target_params>:
     // <start_sector> is 0
     // <size> is size of device in sectors, and one sector is equal to 512 bytes.
