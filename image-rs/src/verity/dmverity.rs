@@ -341,6 +341,7 @@ pub fn create_verity_device(
 
 
     start_udev();
+    
     Ok(format!("/dev/mapper/{}", &verity_option.hash))
 }
 
