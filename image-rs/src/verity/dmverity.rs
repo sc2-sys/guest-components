@@ -275,6 +275,9 @@ pub fn create_verity_device(
 
     //println!("KS (image-rs) dev info collected: {:?}", dev_info);
 
+    let devs = dm.list_devices();
+
+    println!("CSG-M4GIC: KS (image-rs) listing devices: {:?}", devs);
 
     ////////
     // let cmd = "ls /dev/mapper";
