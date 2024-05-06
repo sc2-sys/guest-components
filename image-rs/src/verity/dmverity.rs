@@ -261,7 +261,7 @@ pub fn create_verity_device(
     );
     println!("CSG-M4GIC: (KS-image-rs) dm_verity params: ({:?})", verity_params);
 
-    //start_udev();
+    start_udev();
 
     // Mapping table in device mapper: <start_sector> <size> <target_name> <target_params>:
     // <start_sector> is 0
@@ -301,31 +301,7 @@ pub fn create_verity_device(
 
     println!("CSG-M4GIC: KS (image-rs) listing devices: {:?}", devs);
 
-    ////////
-    // let cmd = "ls /dev/mapper";
-    // let output = Command::new("sh")
-    // .arg("-c")
-    // .arg(cmd)
-    // .output()
-    // .expect("KS (image-rs) Failed to execute 'ls' command");
-
-    // if output.status.success() {
-    //     let stdout = str::from_utf8(&output.stdout)
-    //         .unwrap_or("KS Failed to decode stdout as UTF-8");
-
-    //     for line in stdout.split('\n') {
-    //         println!("KS mapper file: {}", line);
-    //     }
-    // } else {
-    //     let stderr = str::from_utf8(&output.stderr)
-    //         .unwrap_or("KS Failed to decode stderr as UTF-8");
-    //     eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
-    // }
-
-
     //dm.device_suspend(&id, opts)?;
-
-    //dm.device_suspend(&id, DmOptions::default().set_flags(DmFlags::DM_SKIP_LOCKFS)).unwrap();
 
     let result = dm.device_suspend(&id, opts);
     println!("KS (image-rs) Device suspended result {:?}", result);
@@ -339,9 +315,6 @@ pub fn create_verity_device(
     }
     println!("CSG-M4GIC: END: (KS-image-rs) create_verity_device");
 
-
-    start_udev();
-    
     Ok(format!("/dev/mapper/{}", &verity_option.hash))
 }
 
