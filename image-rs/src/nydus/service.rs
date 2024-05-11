@@ -90,7 +90,6 @@ pub async fn start_nydus_service(
         } else {
             bootstrap_meta.compressed_digest.clone()
         };
-
         if let Err(e) = task::spawn_blocking(move || {
             process_fscache_daemon(
                 id,
@@ -169,7 +168,7 @@ pub fn process_fuse_daemon(
         reference.repository(),
         work_dir.join("cache"),
     );
-    //println!("KS-image-rs: process_fuse_deamon called, with config ({:?}), bootstrap ({:?}), mountpoint ({:?}),  workdir ({:?}) and fuse_config ({:?})", config, bootstrap, mountpoint, work_dir, fuse_config);
+    println!("KS-image-rs: process_fuse_deamon called, with reference: {:?}, config ({:?}), bootstrap ({:?}), mountpoint ({:?}),  workdir ({:?}) and fuse_config ({:?})", reference, config, bootstrap, mountpoint, work_dir, fuse_config);
 
     if !mountpoint.exists() {
         std::fs::create_dir_all(mountpoint)?;
