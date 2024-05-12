@@ -18,7 +18,7 @@ cfg-if = { workspace = true, optional = true }
 #devicemapper = { version =  "0.33.5", optional = true }
 devicemapper = { git="https://github.com/konsougiou/devicemapper-rs", rev="29d6dd5", optional = true}
 dircpy = { version = "0.3.12", optional = true }
-flate2 = "1.0.28"
+flate2 = "1.0.25"
 fs_extra = { version = "1.2.0", optional = true }
 futures = { version = "0.3.28", optional = true }
 futures-util = "0.3"
@@ -52,7 +52,7 @@ walkdir = "2"
 zstd = "0.12"
 
 nydus-api = { version = "0.3.0", optional = true}
-nydus-service = { git="https://github.com/konsougiou/nydus.git", rev="93b3e3e",  features = ["coco"], default-features = false, optional = true}
+nydus-service = { git="https://github.com/konsougiou/nydus.git", rev="571c45c",  features = ["coco"], default-features = false, optional = true}
 #nydus-service = { version = "0.3.0", features = ["coco"], optional = true}
 
 [build-dependencies]
