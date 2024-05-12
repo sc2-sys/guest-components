@@ -42,7 +42,8 @@ sha2.workspace = true
 sigstore = { git = "https://github.com/sigstore/sigstore-rs.git", rev = "69e8f33", default-features = false, optional = true}
 strum.workspace = true
 strum_macros = "0.25"
-tar = "0.4.37"
+#tar = "0.4.37"
+tar = "0.4.40"
 tokio.workspace = true
 tonic = { workspace = true, optional = true }
 ttrpc = { workspace = true, features = [ "async" ], optional = true }
