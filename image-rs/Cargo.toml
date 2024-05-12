@@ -52,7 +52,7 @@ walkdir = "2"
 zstd = "0.12"
 
 nydus-api = { version = "0.3.0", optional = true}
-nydus-service = { git="https://github.com/konsougiou/nydus.git", rev="571c45c",  features = ["coco"], default-features = false, optional = true}
+nydus-service = { git="https://github.com/konsougiou/nydus.git", rev="5418139",  features = ["coco"], default-features = false, optional = true}
 #nydus-service = { version = "0.3.0", features = ["coco"], optional = true}
 
 [build-dependencies]
