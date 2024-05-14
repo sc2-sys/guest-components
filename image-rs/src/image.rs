@@ -17,12 +17,12 @@ use std::sync::Arc;
 use std::str;
 use std::process::Command;
 use nix::unistd::{access, AccessFlags};
-use reqwest::Client;
-use std::fs::File;
 use std::io::Write;
 use tokio::runtime::Runtime;
 
-use std::fs;
+use reqwest::blocking::Client;
+use std::fs::{self, File};
+
 use futures_util::StreamExt;
 
 use tokio::sync::Mutex;
