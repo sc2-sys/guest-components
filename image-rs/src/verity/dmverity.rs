@@ -17,7 +17,7 @@ use std::io::Write;
 use tokio::runtime::Runtime;
 
 use std::fs;
-
+use futures_util::StreamExt;
 
 
 /// Configuration information for DmVerity device.
