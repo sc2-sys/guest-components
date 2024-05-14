@@ -162,7 +162,8 @@ impl Default for ImageClient {
     }
 }
 
-async fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error>> {
+
+fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new();
     let blob_ids = ["ac2c9c7c25e992c7a0f1b6261112df95281324d8229541317f763dfaf01c7f30", "c737fc16374b9e9a352300146ab49de56f0068e42618fe2ebe3323d4069b7b89"];
     let cache_dir = "/opt/nydus/cache/";
@@ -172,20 +173,16 @@ async fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error>> {
     for &blob_id in &blob_ids {
         println!("KS: pre fetching blob_id: {}", blob_id);
         let url = format!("https://external-registry.coco-csg.com/v2/tf-serving-tinybert/blobs/sha256:{}", blob_id);
-        let response = client.get(&url).send().await?;
+        let response = client.get(&url).send()?;
 
         if response.status().is_success() {
-            let mut content = Vec::new();
-            let mut content_stream = response.bytes_stream();
-            while let Some(item) = content_stream.next().await {
-                content.extend(item?);
-            }
+            let content = response.bytes()?;
 
             let cache_path = format!("{}{}", cache_dir, blob_id);
             let mut file = File::create(cache_path)?;
             file.write_all(&content)?;
         } else {
-            eprintln!("KS: Failed to fetch blob: {}", blob_id);
+            eprintln!("Failed to fetch blob: {}", blob_id);
         }
     }
 
@@ -529,8 +526,7 @@ impl ImageClient {
 
             //println!("CSG-M4GIC: END: (KS-image-rs) Handle Bootstrap");
 
-        let rt = Runtime::new().unwrap();
-        rt.block_on(dummy_prefetch()).unwrap();
+        dummy_prefetch()?;
 
         Ok(image_id)
     }
