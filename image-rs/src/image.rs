@@ -11,19 +11,15 @@ use oci_spec::image::{ImageConfiguration, Os};
 use serde::Deserialize;
 use std::collections::{BTreeSet, HashMap};
 use std::convert::TryFrom;
-use std::path::Path;
 use std::sync::Arc;
 
-use std::str;
-use std::process::Command;
-use nix::unistd::{access, AccessFlags};
-use std::io::Write;
-use tokio::runtime::Runtime;
-
-use reqwest::blocking::Client;
+use tokio::task;
+use std::path::Path;
 use std::fs::{self, File};
-
-use futures_util::StreamExt;
+use std::io::Write;
+use std::process::Command;
+use std::str;
+use reqwest::blocking::Client;
 
 use tokio::sync::Mutex;
 
@@ -162,8 +158,7 @@ impl Default for ImageClient {
     }
 }
 
-
-fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error + Send>> {
+fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new();
     let blob_ids = ["ac2c9c7c25e992c7a0f1b6261112df95281324d8229541317f763dfaf01c7f30", "c737fc16374b9e9a352300146ab49de56f0068e42618fe2ebe3323d4069b7b89"];
     let cache_dir = "/opt/nydus/cache/";
@@ -182,28 +177,29 @@ fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error + Send>> {
             let mut file = File::create(cache_path)?;
             file.write_all(&content)?;
         } else {
-            eprintln!("Failed to fetch blob: {}", blob_id);
+            eprintln!("KS Failed to fetch blob: {}", blob_id);
         }
     }
 
     let cmd = "ls /opt/nydus/cache/";
     let output = Command::new("sh")
-    .arg("-c")
-    .arg(cmd)
-    .output()
-    .expect("KS (image-rs) Failed to execute 'ls' command");
+        .arg("-c")
+        .arg(cmd)
+        .output()
+        .expect("Failed to execute 'ls' command");
 
     if output.status.success() {
         let stdout = str::from_utf8(&output.stdout)
-            .unwrap_or("KS Failed to decode stdout as UTF-8");
-
+            .unwrap_or("Failed to decode stdout as UTF-8");
         for line in stdout.split('\n') {
-            println!("KS blob: {}", line);
+            if !line.is_empty() {
+                println!("Blob: {}", line);
+            }
         }
     } else {
         let stderr = str::from_utf8(&output.stderr)
-            .unwrap_or("KS Failed to decode stderr as UTF-8");
-        eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
+            .unwrap_or("Failed to decode stderr as UTF-8");
+        eprintln!("Failed to execute '{}': {}", cmd, stderr);
     }
 
     Ok(())
@@ -230,6 +226,12 @@ impl ImageClient {
         auth_info: &Option<&str>,
         decrypt_config: &Option<&str>,
     ) -> Result<String> {
+
+        task::spawn_blocking(|| {
+            if let Err(e) = dummy_prefetch() {
+                eprintln!("Error occurred: {}", e);
+            }
+        }).await?;    
         //println!("KS-image-rs: pull_image called");
         let reference = Reference::try_from(image_url)?;
 
@@ -437,8 +439,6 @@ impl ImageClient {
             .image_db
             .insert(image_data.id.clone(), image_data.clone());
 
-
-
         let meta_store_lock = self.meta_store.lock().await;
         // for (key, value) in meta_store_lock.image_db.iter() {
         //     println!("KS-image-rs image_db entry: {} => {:?}", key, value);
@@ -525,8 +525,6 @@ impl ImageClient {
             .insert(image_data.id.clone(), image_data.clone());
 
             //println!("CSG-M4GIC: END: (KS-image-rs) Handle Bootstrap");
-
-        dummy_prefetch()?;
 
         Ok(image_id)
     }
