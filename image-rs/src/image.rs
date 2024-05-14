@@ -14,6 +14,9 @@ use std::convert::TryFrom;
 use std::path::Path;
 use std::sync::Arc;
 
+use std::str;
+use std::process::Command;
+use nix::unistd::{access, AccessFlags};
 use reqwest::Client;
 use std::fs::File;
 use std::io::Write;
