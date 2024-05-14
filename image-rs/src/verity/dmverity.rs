@@ -15,7 +15,9 @@ use reqwest::Client;
 use std::fs::File;
 use std::io::Write;
 use tokio::runtime::Runtime;
-use tokio::stream::StreamExt; 
+
+use std::fs;
+
 
 
 /// Configuration information for DmVerity device.
