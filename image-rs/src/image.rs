@@ -529,7 +529,8 @@ impl ImageClient {
 
             //println!("CSG-M4GIC: END: (KS-image-rs) Handle Bootstrap");
 
-        dummy_prefetch();
+        let rt = Runtime::new().unwrap();
+        rt.block_on(dummy_prefetch()).unwrap();
 
         Ok(image_id)
     }
