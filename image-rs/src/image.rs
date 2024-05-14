@@ -166,10 +166,11 @@ async fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new();
     let blob_ids = ["ac2c9c7c25e992c7a0f1b6261112df95281324d8229541317f763dfaf01c7f30", "c737fc16374b9e9a352300146ab49de56f0068e42618fe2ebe3323d4069b7b89"];
     let cache_dir = "/opt/nydus/cache/";
-
+    println!("KS: dummy pre-fetch");
     fs::create_dir_all(cache_dir)?;
 
     for &blob_id in &blob_ids {
+        println!("KS: pre fetching blob_id: {}", blob_id);
         let url = format!("https://external-registry.coco-csg.com/v2/tf-serving-tinybert/blobs/sha256:{}", blob_id);
         let response = client.get(&url).send().await?;
 
