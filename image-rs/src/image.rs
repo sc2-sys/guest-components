@@ -234,7 +234,7 @@ impl ImageClient {
         // }).await?;    
         println!("KS-image-rs: pull_image called with image_url {:?}", image_url);
         //let reference = Reference::try_from(image_url)?;
-        let reference = Reference::try_from("external-registry.coco-csg.com/tf-serving-tinybert:unencrypted")?;
+        let reference = Reference::try_from("external-registry.coco-csg.com/tf-serving-tinybert:unencrypted-nydus")?;
 
         // Try to get auth using input param.
         let auth = if let Some(auth_info) = auth_info {
