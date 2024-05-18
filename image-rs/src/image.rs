@@ -227,12 +227,12 @@ impl ImageClient {
         decrypt_config: &Option<&str>,
     ) -> Result<String> {
 
-        task::spawn_blocking(|| {
-            if let Err(e) = dummy_prefetch() {
-                eprintln!("Error occurred: {}", e);
-            }
-        }).await?;    
-        //println!("KS-image-rs: pull_image called");
+        // task::spawn_blocking(|| {
+        //     if let Err(e) = dummy_prefetch() {
+        //         eprintln!("Error occurred: {}", e);
+        //     }
+        // }).await?;    
+        println!("KS-image-rs: pull_image called with image_url {:?}", image_url);
         let reference = Reference::try_from(image_url)?;
 
         // Try to get auth using input param.
