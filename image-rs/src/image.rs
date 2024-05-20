@@ -233,7 +233,7 @@ impl ImageClient {
         //     }
         // }).await?;
         
-        image_url = "external-registry.coco-csg.com/tf-serving-tinybert:unencrypted-nydus";
+        let image_url = "external-registry.coco-csg.com/tf-serving-tinybert:unencrypted-nydus";
         println!("KS-image-rs: pull_image called with image_url {:?}", image_url);
         
 
