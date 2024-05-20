@@ -168,7 +168,7 @@ pub fn process_fuse_daemon(
         reference.repository(),
         work_dir.join("cache"),
     );
-    println!("KS-image-rs: process_fuse_deamon called, with reference: {:?}, config ({:?}), bootstrap ({:?}), mountpoint ({:?}),  workdir ({:?}) and fuse_config ({:?})", reference, config, bootstrap, mountpoint, work_dir, fuse_config);
+    //println!("KS-image-rs: process_fuse_deamon called, with reference: {:?}, config ({:?}), bootstrap ({:?}), mountpoint ({:?}),  workdir ({:?}) and fuse_config ({:?})", reference, config, bootstrap, mountpoint, work_dir, fuse_config);
 
     if !mountpoint.exists() {
         std::fs::create_dir_all(mountpoint)?;

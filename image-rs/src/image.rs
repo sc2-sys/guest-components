@@ -234,7 +234,7 @@ impl ImageClient {
         // }).await?;
         
         let image_url = "external-registry.coco-csg.com/tf-serving-tinybert:unencrypted-nydus";
-        println!("KS-image-rs: pull_image called with image_url {:?}", image_url);
+        //println!("KS-image-rs: pull_image called with image_url {:?}", image_url);
         
 
         let reference = Reference::try_from(image_url)?;

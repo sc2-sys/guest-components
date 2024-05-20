@@ -149,10 +149,10 @@ fn start_udev() {
 
     if check_udev.status.success() {
         println!("KS (image-rs) udev daemon is already running.");
-        println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
+        //println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
     } else {
         println!("KS (image-rs) udev daemon is not running.");
-        println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
+        //println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
         println!("KS (image-rs) Attempting to start udev...");
 
         let cmds = [
@@ -180,10 +180,10 @@ fn start_udev() {
 
         if check_udev.status.success() {
             println!("KS (image-rs) udev daemon sucesfully started.");
-            println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
+            //println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
         } else {
             println!("KS (image-rs) udev daemon not started.");
-            println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
+            //println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
         }
     }
     if udev_running() {
@@ -259,7 +259,7 @@ pub fn create_verity_device(
         verity_option.hash,
         "-",
     );
-    println!("CSG-M4GIC: (KS-image-rs) dm_verity params: ({:?})", verity_params);
+    //println!("CSG-M4GIC: (KS-image-rs) dm_verity params: ({:?})", verity_params);
 
     start_udev();
 
@@ -286,11 +286,9 @@ pub fn create_verity_device(
     //     result.unwrap();
     // }
 
-    println!("KS (image-rs) verity device created");
-
     let dev_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
 
-    println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", dev_info);
+    //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", dev_info);
 
     //println!("KS (image-rs) verity table loaded");
 
@@ -298,7 +296,7 @@ pub fn create_verity_device(
 
     let devs = dm.list_devices();
 
-    println!("CSG-M4GIC: KS (image-rs) listing devices: {:?}", devs);
+    //println!("CSG-M4GIC: KS (image-rs) listing devices: {:?}", devs);
 
     //dm.device_suspend(&id, opts)?;
 
