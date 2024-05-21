@@ -235,7 +235,7 @@ impl ImageClient {
         
         //let image_url = "external-registry.coco-csg.com/tf-serving-tinybert:unencrypted-nydus";
         //println!("KS-image-rs: pull_image called with image_url {:?}", image_url);
-        let image_url = image_url.replace("blob-cache", "unencrypted-nydus");
+        let image_url: &str = &image_url.replace("blob-cache", "unencrypted-nydus");
         println!("KS-image-rs: adjusted image_url {:?}", image_url);
 
         let reference = Reference::try_from(image_url)?;
