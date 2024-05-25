@@ -176,7 +176,7 @@ fn start_udev() {
         let check_udev = Command::new("pgrep")
         .args(&["-x", "systemd-udevd"])
         .output()
-        .expect("KS (image-rs) Failed to execute pgrep");
+        .expect("KS (image-rs) Failed to exec pgrep");
 
         if check_udev.status.success() {
             println!("KS (image-rs) udev daemon sucesfully started.");
