@@ -149,10 +149,8 @@ fn start_udev() {
 
     if check_udev.status.success() {
         println!("KS (image-rs) udev daemon is already running.");
-        //println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
     } else {
         println!("KS (image-rs) udev daemon is not running.");
-        //println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
         println!("KS (image-rs) Attempting to start udev...");
 
         let cmds = [
@@ -180,10 +178,8 @@ fn start_udev() {
 
         if check_udev.status.success() {
             println!("KS (image-rs) udev daemon sucesfully started.");
-            //println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
         } else {
             println!("KS (image-rs) udev daemon not started.");
-            //println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
         }
     }
     if udev_running() {
@@ -276,15 +272,10 @@ pub fn create_verity_device(
        verity_params,
     )];
 
-    //dm.device_create(verity_name, None, opts)?;
     let dev = dm.device_create(verity_name, None, opts).unwrap();
 
     println!("CSG-M4GIC: (KS-image-rs) Device created: {:?}", dev);
 
-    // if let Err(ref e) = result {
-    //     println!("CSG-M4GIC: (KS-image-rs) Error occurred while creating device: {}", e);
-    //     result.unwrap();
-    // }
 
     let dev_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
 

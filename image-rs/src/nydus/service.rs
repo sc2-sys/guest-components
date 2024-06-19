@@ -168,6 +168,36 @@ pub fn process_fuse_daemon(
         reference.repository(),
         work_dir.join("cache"),
     );
+
+    // let config = format!(
+    //     r###"
+    // {{
+    // "device": {{
+    //     "backend": {{
+    //         "type": "localfs",
+    //         "config": {{
+    //             "scheme": "https",
+    //             "host": {:?},
+    //             "repo": {:?}
+    //         }}
+    //     }},
+    //     "cache": {{
+    //         "type": "blobcache",
+    //         "config": {{
+    //             "compressed": false,
+    //             "work_dir": {:?}
+    //         }}
+    //     }}
+    // }},
+    // "mode": "direct",
+    // "digest_validate": false,
+    // "iostats_files": false
+    // }}
+    // "###,
+    //     reference.registry(),
+    //     reference.repository(),
+    //     work_dir.join("cache"),
+    // );
     //println!("KS-image-rs: process_fuse_deamon called, with reference: {:?}, config ({:?}), bootstrap ({:?}), mountpoint ({:?}),  workdir ({:?}) and fuse_config ({:?})", reference, config, bootstrap, mountpoint, work_dir, fuse_config);
 
     if !mountpoint.exists() {

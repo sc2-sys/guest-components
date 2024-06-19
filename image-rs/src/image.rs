@@ -106,8 +106,6 @@ impl Default for ImageClient {
     fn default() -> ImageClient {
         let config = ImageConfig::try_from(Path::new(CONFIGURATION_FILE_PATH)).unwrap_or_default();
 
-        //println!("KS-image-rs: Starting ImageClient with config: ({:?})", config);
-
         let meta_store = MetaStore::try_from(Path::new(METAFILE)).unwrap_or_default();
 
         #[allow(unused_mut)]
@@ -156,53 +154,6 @@ impl Default for ImageClient {
             snapshots,
         }
     }
-}
-
-fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::new();
-    let blob_ids = ["ac2c9c7c25e992c7a0f1b6261112df95281324d8229541317f763dfaf01c7f30", "c737fc16374b9e9a352300146ab49de56f0068e42618fe2ebe3323d4069b7b89"];
-    let cache_dir = "/opt/nydus/cache/";
-    println!("KS: dummy pre-fetch");
-    fs::create_dir_all(cache_dir)?;
-
-    for &blob_id in &blob_ids {
-        println!("KS: pre fetching blob_id: {}", blob_id);
-        let url = format!("https://external-registry.coco-csg.com/v2/tf-serving-tinybert/blobs/sha256:{}", blob_id);
-        let response = client.get(&url).send()?;
-
-        if response.status().is_success() {
-            let content = response.bytes()?;
-
-            let cache_path = format!("{}{}", cache_dir, blob_id);
-            let mut file = File::create(cache_path)?;
-            file.write_all(&content)?;
-        } else {
-            eprintln!("KS Failed to fetch blob: {}", blob_id);
-        }
-    }
-
-    let cmd = "ls /opt/nydus/cache/";
-    let output = Command::new("sh")
-        .arg("-c")
-        .arg(cmd)
-        .output()
-        .expect("Failed to execute 'ls' command");
-
-    if output.status.success() {
-        let stdout = str::from_utf8(&output.stdout)
-            .unwrap_or("Failed to decode stdout as UTF-8");
-        for line in stdout.split('\n') {
-            if !line.is_empty() {
-                println!("Blob: {}", line);
-            }
-        }
-    } else {
-        let stderr = str::from_utf8(&output.stderr)
-            .unwrap_or("Failed to decode stderr as UTF-8");
-        eprintln!("Failed to execute '{}': {}", cmd, stderr);
-    }
-
-    Ok(())
 }
 
 
@@ -305,7 +256,6 @@ impl ImageClient {
             (false, true) => RegistryAuth::Anonymous,
             _ => auth.expect("unexpected uninitialized auth"),
         };
-        //println!("KS-image-rs: Instantiating PullClient");
 
         let mut client = PullClient::new(
             reference,
@@ -378,7 +328,6 @@ impl ImageClient {
         {
             let m = self.meta_store.lock().await;
             if let Some(image_data) = &m.image_db.get(&id) {
-                //println!("KS-image-rs: meta_store already populated with ({:?})", image_data);
                 return create_bundle(image_data, bundle_dir, snapshot);
             }
         }
@@ -424,10 +373,6 @@ impl ImageClient {
             .map(|layer| (layer.compressed_digest.clone(), layer.clone()))
             .collect();
 
-        // for (key, value) in layer_db.clone() {
-        //         println!("KS-image-rs layer_db entry: {} => {:?}", key, value);
-        //     }
-
         self.meta_store.lock().await.layer_db.extend(layer_db);
 
         if unique_layers_len != image_data.layer_metas.len() {
@@ -446,10 +391,6 @@ impl ImageClient {
             .insert(image_data.id.clone(), image_data.clone());
 
         let meta_store_lock = self.meta_store.lock().await;
-        // for (key, value) in meta_store_lock.image_db.iter() {
-        //     println!("KS-image-rs image_db entry: {} => {:?}", key, value);
-        // }
-    
 
         Ok(image_id)
     }
