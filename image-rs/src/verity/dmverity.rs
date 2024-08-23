@@ -8,6 +8,10 @@ use devicemapper::{DevId, DmFlags, DmName, DmOptions, DM};
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::path::Path;
+use std::str;
+use std::process::Command;
+use nix::unistd::{access, AccessFlags};
+
 
 /// Configuration information for DmVerity device.
 #[derive(Debug, Deserialize, Serialize)]
@@ -129,6 +133,66 @@ impl TryFrom<&String> for DmVerityOption {
     }
 }
 
+fn udev_running() -> bool {
+    const UDEV_SOCKET_PATH: &str = "/run/udev/control";
+    matches!(
+        access(Path::new(UDEV_SOCKET_PATH), AccessFlags::F_OK),
+        Ok(())
+    )
+}
+
+fn start_udev() {
+    let check_udev = Command::new("pgrep")
+        .args(&["-x", "systemd-udevd"])
+        .output()
+        .expect("KS (image-rs) Failed to execute pgrep");
+
+    if check_udev.status.success() {
+        println!("KS (image-rs) udev daemon is already running.");
+        //println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
+    } else {
+        println!("KS (image-rs) udev daemon is not running.");
+        //println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
+        println!("KS (image-rs) Attempting to start udev...");
+
+        let cmds = [
+            "/lib/systemd/systemd-udevd --daemon",
+            "udevadm trigger",
+            "udevadm settle",
+        ];
+        for cmd in cmds.iter() {
+            let output = Command::new("sh")
+                .arg("-c")
+                .arg(cmd)
+                .output()
+                .expect("KS (image-rs) Failed to execute udev command");
+
+            if output.status.success() {
+                println!("KS (image-rs) Command '{}' executed successfully.", cmd);
+            } else {
+                eprintln!("KS (image-rs) Failed to execute '{}': {}", cmd, str::from_utf8(&output.stderr).unwrap());
+            }
+        }
+        let check_udev = Command::new("pgrep")
+        .args(&["-x", "systemd-udevd"])
+        .output()
+        .expect("KS (image-rs) Failed to exec pgrep");
+
+        if check_udev.status.success() {
+            println!("KS (image-rs) udev daemon sucesfully started.");
+            //println!("KS (image-rs) pgrep output: {}", str::from_utf8(&check_udev.stdout).unwrap());
+        } else {
+            println!("KS (image-rs) udev daemon not started.");
+            //println!("KS (image-rs) pgrep stderr: {}", str::from_utf8(&check_udev.stderr).unwrap());
+        }
+    }
+    if udev_running() {
+        println!("KS udev/control is accessible.");
+    } else {
+        println!("KS udev/control is NOT accessible.");
+    }
+}
+
 /// Creates a mapping with <name> backed by data_device <source_device_path>
 /// and using hash_device for in-kernel verification.
 /// It will return the verity block device Path "/dev/mapper/<name>"
@@ -137,6 +201,28 @@ pub fn create_verity_device(
     verity_option: &DmVerityOption,
     source_device_path: &Path,
 ) -> Result<String> {
+    println!("CSG-M4GIC: B3G1N: (KS-image-rs) create_verity_device, path: ({:?}), option: ({:?})", source_device_path, verity_option);
+
+    let cmd = "ls /dev/mapper";
+    let output = Command::new("sh")
+    .arg("-c")
+    .arg(cmd)
+    .output()
+    .expect("KS (image-rs) Failed to execute 'ls' command");
+
+    if output.status.success() {
+        let stdout = str::from_utf8(&output.stdout)
+            .unwrap_or("KS Failed to decode stdout as UTF-8");
+
+        for line in stdout.split('\n') {
+            println!("KS mapper file: {}", line);
+        }
+    } else {
+        let stderr = str::from_utf8(&output.stderr)
+            .unwrap_or("KS Failed to decode stderr as UTF-8");
+        eprintln!("KS Failed to execute '{}': {}", cmd, stderr);
+    }
+
     let dm = DM::new()?;
     let verity_name = DmName::new(&verity_option.hash)?;
     let id = DevId::Name(verity_name);
@@ -173,21 +259,58 @@ pub fn create_verity_device(
         verity_option.hash,
         "-",
     );
+    //println!("CSG-M4GIC: (KS-image-rs) dm_verity params: ({:?})", verity_params);
+
+    start_udev();
+
     // Mapping table in device mapper: <start_sector> <size> <target_name> <target_params>:
     // <start_sector> is 0
     // <size> is size of device in sectors, and one sector is equal to 512 bytes.
     // <target_name> is name of mapping target, here "verity" for dm-verity
     // <target_params> are parameters for verity target
+    
     let verity_table = vec![(
-        0,
-        verity_option.blocknum * verity_option.blocksize / 512,
-        "verity".into(),
-        verity_params,
+       0,
+       verity_option.blocknum * verity_option.blocksize / 512,
+       "verity".into(),
+       verity_params,
     )];
 
-    dm.device_create(verity_name, None, opts)?;
-    dm.table_load(&id, verity_table.as_slice(), opts)?;
-    dm.device_suspend(&id, opts)?;
+    //dm.device_create(verity_name, None, opts)?;
+    let dev = dm.device_create(verity_name, None, opts).unwrap();
+
+    println!("CSG-M4GIC: (KS-image-rs) Device created: {:?}", dev);
+
+    // if let Err(ref e) = result {
+    //     println!("CSG-M4GIC: (KS-image-rs) Error occurred while creating device: {}", e);
+    //     result.unwrap();
+    // }
+
+    let dev_info = dm.table_load(&id, verity_table.as_slice(), opts)?;
+
+    //println!("CSG-M4GIC: KS (image-rs)  Loaded table with dev info: {:?}", dev_info);
+
+    //println!("KS (image-rs) verity table loaded");
+
+    //println!("KS (image-rs) dev info collected: {:?}", dev_info);
+
+    let devs = dm.list_devices();
+
+    //println!("CSG-M4GIC: KS (image-rs) listing devices: {:?}", devs);
+
+    //dm.device_suspend(&id, opts)?;
+
+    let result = dm.device_suspend(&id, opts);
+    println!("KS (image-rs) Device suspended result {:?}", result);
+    match result {
+        Ok(device_info) => {
+            println!("KS (image-rs) Device suspended successfully. Device info: {:?}", device_info);
+        },
+        Err(e) => {
+            println!("KS (image-rs) Error occurred while trying to suspend device: {:?}", e);
+        }
+    }
+    println!("CSG-M4GIC: END: (KS-image-rs) create_verity_device");
 
     Ok(format!("/dev/mapper/{}", &verity_option.hash))
 }

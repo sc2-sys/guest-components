@@ -11,8 +11,15 @@ use oci_spec::image::{ImageConfiguration, Os};
 use serde::Deserialize;
 use std::collections::{BTreeSet, HashMap};
 use std::convert::TryFrom;
-use std::path::Path;
 use std::sync::Arc;
+
+use tokio::task;
+use std::path::Path;
+use std::fs::{self, File};
+use std::io::Write;
+use std::process::Command;
+use std::str;
+use reqwest::blocking::Client;
 
 use tokio::sync::Mutex;
 
@@ -98,6 +105,9 @@ impl Default for ImageClient {
     // construct a default instance of `ImageClient`
     fn default() -> ImageClient {
         let config = ImageConfig::try_from(Path::new(CONFIGURATION_FILE_PATH)).unwrap_or_default();
+
+        //println!("KS-image-rs: Starting ImageClient with config: ({:?})", config);
+
         let meta_store = MetaStore::try_from(Path::new(METAFILE)).unwrap_or_default();
 
         #[allow(unused_mut)]
@@ -114,6 +124,8 @@ impl Default for ImageClient {
                 data_dir,
                 std::sync::atomic::AtomicUsize::new(*overlay_index),
             );
+
+            //println!("KS-image-rs: Starting overlayfs snapshotter");
             snapshots.insert(
                 SnapshotType::Overlay,
                 Box::new(overlayfs) as Box<dyn Snapshotter>,
@@ -146,6 +158,54 @@ impl Default for ImageClient {
     }
 }
 
+fn dummy_prefetch() -> Result<(), Box<dyn std::error::Error>> {
+    let client = Client::new();
+    let blob_ids = ["ac2c9c7c25e992c7a0f1b6261112df95281324d8229541317f763dfaf01c7f30", "c737fc16374b9e9a352300146ab49de56f0068e42618fe2ebe3323d4069b7b89"];
+    let cache_dir = "/opt/nydus/cache/";
+    println!("KS: dummy pre-fetch");
+    fs::create_dir_all(cache_dir)?;
+
+    for &blob_id in &blob_ids {
+        println!("KS: pre fetching blob_id: {}", blob_id);
+        let url = format!("https://external-registry.coco-csg.com/v2/tf-serving-tinybert/blobs/sha256:{}", blob_id);
+        let response = client.get(&url).send()?;
+
+        if response.status().is_success() {
+            let content = response.bytes()?;
+
+            let cache_path = format!("{}{}", cache_dir, blob_id);
+            let mut file = File::create(cache_path)?;
+            file.write_all(&content)?;
+        } else {
+            eprintln!("KS Failed to fetch blob: {}", blob_id);
+        }
+    }
+
+    let cmd = "ls /opt/nydus/cache/";
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg(cmd)
+        .output()
+        .expect("Failed to execute 'ls' command");
+
+    if output.status.success() {
+        let stdout = str::from_utf8(&output.stdout)
+            .unwrap_or("Failed to decode stdout as UTF-8");
+        for line in stdout.split('\n') {
+            if !line.is_empty() {
+                println!("Blob: {}", line);
+            }
+        }
+    } else {
+        let stderr = str::from_utf8(&output.stderr)
+            .unwrap_or("Failed to decode stderr as UTF-8");
+        eprintln!("Failed to execute '{}': {}", cmd, stderr);
+    }
+
+    Ok(())
+}
+
+
 impl ImageClient {
     /// pull_image pulls an image with optional auth info and decrypt config
     /// and store the pulled data under user defined work_dir/layers.
@@ -166,7 +226,20 @@ impl ImageClient {
         auth_info: &Option<&str>,
         decrypt_config: &Option<&str>,
     ) -> Result<String> {
+
+        // task::spawn_blocking(|| {
+        //     if let Err(e) = dummy_prefetch() {
+        //         eprintln!("Error occurred: {}", e);
+        //     }
+        // }).await?;
+        
+        //let image_url = "external-registry.coco-csg.com/tf-serving-tinybert:unencrypted-nydus";
+        //println!("KS-image-rs: pull_image called with image_url {:?}", image_url);
+        let image_url: &str = &image_url.replace("blob-cache", "unencrypted-nydus");
+        println!("KS-image-rs: adjusted image_url {:?}", image_url);
+
         let reference = Reference::try_from(image_url)?;
+        //let reference = Reference::try_from("external-registry.coco-csg.com/tf-serving-tinybert:unencrypted-nydus")?;
 
         // Try to get auth using input param.
         let auth = if let Some(auth_info) = auth_info {
@@ -232,6 +305,7 @@ impl ImageClient {
             (false, true) => RegistryAuth::Anonymous,
             _ => auth.expect("unexpected uninitialized auth"),
         };
+        //println!("KS-image-rs: Instantiating PullClient");
 
         let mut client = PullClient::new(
             reference,
@@ -239,7 +313,11 @@ impl ImageClient {
             &auth,
             self.config.max_concurrent_download,
         )?;
+        //println!("CSG-M4GIC: B3G1N: (KS-image-rs) Pull Manifest");
+
         let (image_manifest, image_digest, image_config) = client.pull_manifest().await?;
+
+        //println!("CSG-M4GIC: END: (KS-image-rs) Pull Manifest");
 
         let id = image_manifest.config.digest.clone();
 
@@ -255,6 +333,7 @@ impl ImageClient {
 
         #[cfg(feature = "nydus")]
         if utils::is_nydus_image(&image_manifest) {
+            println!("KS-image-rs: Nydus image detected");
             {
                 let m = self.meta_store.lock().await;
                 if let Some(image_data) = &m.image_db.get(&id) {
@@ -281,8 +360,8 @@ impl ImageClient {
                 &image_digest,
                 &image_config,
             )?;
-
-            return self
+            //println!("CSG-M4GIC: B3G1N: (KS-image-rs) Nydus Image Pull");
+            let ret = self
                 .do_pull_image_with_nydus(
                     &mut client,
                     &mut image_data,
@@ -291,18 +370,22 @@ impl ImageClient {
                     bundle_dir,
                 )
                 .await;
+            //println!("CSG-M4GIC: END: (KS-image-rs) Nydus Image Pull");
+            return ret
         }
 
         // If image has already been populated, just create the bundle.
         {
             let m = self.meta_store.lock().await;
             if let Some(image_data) = &m.image_db.get(&id) {
+                //println!("KS-image-rs: meta_store already populated with ({:?})", image_data);
                 return create_bundle(image_data, bundle_dir, snapshot);
             }
         }
 
         #[cfg(feature = "signature")]
         if self.config.security_validate {
+            println!("CSG-M4GIC: B3G1N: (KS-image-rs) Signature Validation");
             crate::signature::allows_image(
                 image_url,
                 &image_digest,
@@ -311,6 +394,7 @@ impl ImageClient {
             )
             .await
             .map_err(|e| anyhow!("Security validate failed: {:?}", e))?;
+            println!("CSG-M4GIC: END: (KS-image-rs) Signature Validation");
         }
 
         let (mut image_data, unique_layers, unique_diff_ids) = create_image_meta(
@@ -322,6 +406,7 @@ impl ImageClient {
         )?;
 
         let unique_layers_len = unique_layers.len();
+        //println!("CSG-M4GIC: B3G1N: Pull Layers ({:?})", image_url);
         let layer_metas = client
             .async_pull_layers(
                 unique_layers,
@@ -330,6 +415,7 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
+        //println!("CSG-M4GIC: END: Pull Layers ({:?})", image_url);
 
         image_data.layer_metas = layer_metas;
         let layer_db: HashMap<String, LayerMeta> = image_data
@@ -338,7 +424,12 @@ impl ImageClient {
             .map(|layer| (layer.compressed_digest.clone(), layer.clone()))
             .collect();
 
+        // for (key, value) in layer_db.clone() {
+        //         println!("KS-image-rs layer_db entry: {} => {:?}", key, value);
+        //     }
+
         self.meta_store.lock().await.layer_db.extend(layer_db);
+
         if unique_layers_len != image_data.layer_metas.len() {
             bail!(
                 " {} layers failed to pull",
@@ -353,6 +444,12 @@ impl ImageClient {
             .await
             .image_db
             .insert(image_data.id.clone(), image_data.clone());
+
+        let meta_store_lock = self.meta_store.lock().await;
+        // for (key, value) in meta_store_lock.image_db.iter() {
+        //     println!("KS-image-rs image_db entry: {} => {:?}", key, value);
+        // }
+    
 
         Ok(image_id)
     }
@@ -373,6 +470,8 @@ impl ImageClient {
             bail!("Failed to get bootstrap id, diff_ids is empty");
         };
 
+        //println!("CSG-M4GIC: B3G1N: (KS-image-rs) Nydus Bootstrap Pull");
+
         let bootstrap = utils::get_nydus_bootstrap_desc(image_manifest)
             .ok_or_else(|| anyhow!("Faild to get bootstrap oci descriptor"))?;
         let layer_metas = client
@@ -383,6 +482,9 @@ impl ImageClient {
                 self.meta_store.clone(),
             )
             .await?;
+        //println!("CSG-M4GIC: END: (KS-image-rs) Nydus Bootstrap Pull");
+        
+        //println!("CSG-M4GIC: B3G1N: (KS-image-rs) Handle Bootstrap");
         image_data.layer_metas = vec![layer_metas];
         let layer_db: HashMap<String, LayerMeta> = image_data
             .layer_metas
@@ -408,9 +510,10 @@ impl ImageClient {
                 bail!(
                     "default snapshot {} not found",
                     &self.config.default_snapshot
-                );
+                ); 
             }
         };
+        //println!("KS-image-rs: Starting nydus service");
         let image_id = service::start_nydus_service(
             image_data,
             reference,
@@ -426,6 +529,8 @@ impl ImageClient {
             .await
             .image_db
             .insert(image_data.id.clone(), image_data.clone());
+
+            //println!("CSG-M4GIC: END: (KS-image-rs) Handle Bootstrap");
 
         Ok(image_id)
     }

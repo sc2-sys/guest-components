@@ -20,6 +20,8 @@ pub fn is_nydus_meta_layer(desc: &manifest::OciDescriptor) -> bool {
 }
 
 pub fn is_nydus_image(image_manifest: &manifest::OciImageManifest) -> bool {
+
+    //println!("KS-image-rs: Checking if image is nydus");
     get_nydus_bootstrap_desc(image_manifest).is_some()
 }
 
@@ -32,9 +34,11 @@ pub fn get_nydus_bootstrap_desc(
         if is_nydus_meta_layer(desc) {
             Some(desc.clone())
         } else {
+            println!("KS-image-rs: is nydus meta layers == false");
             None
         }
     } else {
+        //println!("KS-image-rs: layers is empty. Not a nydus image");
         None
     }
 }

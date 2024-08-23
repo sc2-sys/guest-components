@@ -2,5 +2,7 @@
 
 .DS_Store
 
+.vscode
+
 image-rs/scripts/attestation-agent
 shell.nix
